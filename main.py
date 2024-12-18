@@ -1,41 +1,37 @@
-from flask import Flask, request
-import requests
+import logging
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
-app = Flask(__name__)
+# توکن ربات تلگرام خود را اینجا وارد کن
+TOKEN = '8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY'
 
-# توکن ربات را اینجا قرار بده
-TOKEN = "8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY"
+# راه‌اندازی logging برای خطایابی
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# مسیر اصلی برای دریافت پیام‌ها
-@app.route(f"/{TOKEN}", methods=["POST"])
-def receive_update():
-    data = request.get_json()
-    if "message" in data:
-        chat_id = data["message"]["chat"]["id"]
-        text = data["message"]["text"]
-        if text == "/start":
-            send_message(chat_id, "به ربات ساده خوش آمدید!")
-        else:
-            send_message(chat_id, f"شما گفتید: {text}")
-    return "OK"
+# دستور start که وقتی کاربر وارد ربات می‌شود، اجرا می‌شود
+def start(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text('سلام! من ربات شما هستم.')
 
-# تابع برای ارسال پیام
-def send_message(chat_id, text):
-    url = f"https://api.telegram.org/bot8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-    }
-    requests.post(url, json=payload)
+# دستور help که کمک‌های ساده‌ای ارائه می‌دهد
+def help(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text('برای شروع از دستور /start استفاده کن.')
 
-# مسیر برای تنظیم وب‌هوک
-@app.route("/set_webhook", methods=["GET"])
-def set_webhook():
-    webhook_url = f"https://YOUR_REPLIT_URL/8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY"
-    url = f"https://api.telegram.org/bot8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY/setWebhook"
-    response = requests.post(url, data={"url": webhook_url})
-    return response.text
+def main():
+    """شروع ربات و تنظیمات webhook"""
+    updater = Updater8140337198:AAG66xEAxQhrmegDURVugQKwSdePOvOu_YY
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    # دریافت دیسپاچر برای ثبت هندلرها
+    dispatcher = updater.dispatcher
 
+    # ثبت هندلرها برای دستورات مختلف
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("help", help))
+
+    # شروع ربات
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
